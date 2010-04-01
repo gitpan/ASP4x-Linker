@@ -28,7 +28,7 @@
     my $widget = $_;
     my $res = {
       $widget->name => {
-        map { ($_ => $widget->$_) }
+        map { ($_ => $widget->get( $_ )) }
         $widget->attrs
       }
     };

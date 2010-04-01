@@ -15,7 +15,10 @@ META.yml
 runtests.sh
 t/010-basic/010-load.t
 t/010-basic/020-basic.t
-t/010-basic/030-links.t
+t/010-basic/030-vars.t
+t/010-basic/040-links.t
+t/010-basic/050-hidden-fields.t
+t/010-basic/060-widget-triggers.t
 t/conf/asp4-config.json
 t/conf/httpd.conf
 t/htdocs/index.asp

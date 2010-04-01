@@ -262,10 +262,10 @@ WITH_VARS_AND_ROUTER: {
     }) => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=10&widgetC.color=red&widgetD.color=orange&widgetD.type=hat'
   );
   
-  $linker->widget('widgetB')->page_size( 20 );
+  $linker->widget('widgetB')->set( page_size => 20 );
   is(
     $linker->uri() => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=20&widgetC.color=blue&widgetD.type=hat',
-    '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=20&widgetC.color=blue&widgetD.type=hat'
+    'widgetB.page_size = 20'
   );
 
   is(
@@ -283,8 +283,8 @@ WITH_VARS_AND_ROUTER: {
   );
 
   is(
-    $linker->uri() => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=20&widgetC.color=blue&widgetD.type=hat',
-    '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=20&widgetC.color=blue&widgetD.type=hat'
+    $linker->uri() => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=100&widgetC.color=blue&widgetD.type=hat',
+    '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=100&widgetC.color=blue&widgetD.type=hat'
   );
   
   $linker->reset();
@@ -411,7 +411,7 @@ WITH_VARS_AND_ROUTER_POSTED: {
     }) => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=10&widgetC.color=red&widgetD.color=orange&widgetD.type=hat'
   );
   
-  $linker->widget('widgetB')->page_size( 20 );
+  $linker->widget('widgetB')->set( page_size => 20 );
   is(
     $linker->uri() => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=20&widgetC.color=blue&widgetD.type=hat',
     '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=20&widgetC.color=blue&widgetD.type=hat'
@@ -432,8 +432,8 @@ WITH_VARS_AND_ROUTER_POSTED: {
   );
 
   is(
-    $linker->uri() => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=20&widgetC.color=blue&widgetD.type=hat',
-    '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=20&widgetC.color=blue&widgetD.type=hat'
+    $linker->uri() => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=100&widgetC.color=blue&widgetD.type=hat',
+    '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=100&widgetC.color=blue&widgetD.type=hat'
   );
   
   $linker->reset();

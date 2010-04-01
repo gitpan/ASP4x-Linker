@@ -1,6 +1,13 @@
 
+2010-04-01      v.0.002
+  - Added vars() method.
+  - Updated docs.
+  - Removed AUTOLOAD behavior from Widget and Linker.
+  - Added $widget->get( $attr ) and $widget->set( $attr => $value )
+  - Added $widget->on_change( $attr => sub { ... } )
+  - Added several tests.
+
 2010-04-01      v0.001
   - Initial release.
   - No joke!
-
 

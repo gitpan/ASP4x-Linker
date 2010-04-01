@@ -7,7 +7,7 @@ use Carp 'confess';
 use ASP4x::Linker::Widget;
 use ASP4::ConfigLoader;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 
 sub new
@@ -40,6 +40,7 @@ sub add_widget
     if grep { $_->name eq $widget->name } $s->widgets;
   
   push @{ $s->{widgets} }, $widget;
+  $widget;
 }# end add_widget()
 
 
@@ -64,6 +65,41 @@ sub uri
 {
   my ($s, $args) = @_;
   
+  my $vars = $s->vars( $args );
+  
+  no warnings 'uninitialized';
+  my ($uri) = split /\?/, $s->base_href;
+  my $context = ASP4::HTTPContext->current;
+  my $server = $context->server;
+  my $final_querystring = join '&', map { $server->URLEncode($_) . '=' . $server->URLEncode($vars->{$_}) }
+                                      grep { defined($vars->{$_}) }
+                                        sort keys %$vars;
+  
+  return $final_querystring ? join '?', ( $uri, $final_querystring ) : $uri;
+}# end uri()
+
+
+sub hidden_fields
+{
+  my ($s, $args) = @_;
+  
+  my $vars = $s->vars( $args, 1 );
+  
+  no warnings 'uninitialized';
+  my ($uri) = split /\?/, $s->base_href;
+  my $context = ASP4::HTTPContext->current;
+  my $server = $context->server;
+
+  my @inputs = map {qq(<input type="hidden" name="@{[ $server->URLEncode( $_ ) ]}" value="@{[ $server->URLEncode( $vars->{$_} ) ]}" />)}
+                 keys %$vars;
+  return join "\n", @inputs;
+}# end hidden_fields()
+
+
+sub vars
+{
+  my ($s, $args) = @_;
+  
   my @parts = ( );
   no warnings 'uninitialized';
   my ($uri) = split /\?/, $s->base_href;
@@ -72,13 +108,15 @@ sub uri
   my $server = $context->server;
   my %vars = %{ $context->request->Form };
   
-  if( my $route = eval { $s->_router->route_for( $s->base_href, $ENV{REQUEST_METHOD} ) } )
+  if( $context->config->web->can('router') )
   {
-    map {
-      delete($vars{$_});
-    } @{$route->{captures}};
+    if( my $route = eval { $s->_router->route_for( $s->base_href, $ENV{REQUEST_METHOD} ) } )
+    {
+      map {
+        delete($vars{$_});
+      } @{$route->{captures}};
+    }# end if()
   }# end if()
-  
   
   foreach my $w ( $s->widgets )
   {
@@ -86,21 +124,21 @@ sub uri
     {
       my $key = $server->URLEncode( $w->name . '.' . $_ );
       my $val;
-      if( defined( $val = $args->{ $w->name }->{ $_ } ) )
+      if( exists( $args->{ $w->name } ) && exists( $args->{ $w->name }->{ $_ } ) )
       {
-        $vars{ $key } = $val
+        $vars{ $key } = $args->{ $w->name }->{ $_ };
       }
-      elsif( defined( $val = $w->$_ ) )
+      else
       {
-        $vars{ $key } = $val;
+        $vars{ $key } = $w->get( $_ );
       }# end if()
     }# end foreach()
   }# end foreach()
   
-  my $final_querystring = join '&', map { $server->URLEncode($_) . '=' . $server->URLEncode($vars{$_}) } sort keys %vars;
-  
-  return $final_querystring ? join '?', ( $uri, $final_querystring ) : $uri;
-}# end uri()
+  my $res = \%vars;
+  $s->reset();
+  return $res;
+}# end _prepare_vars()
 
 
 sub DESTROY { my $s = shift; undef(%$s); }
@@ -145,8 +183,6 @@ Then:
   $linker->widget('albums')->page_number(4);
   
   <a href="<%= $linker->uri() %>">Page 4</a>  # /some-page.asp?albums.page_number=4
-  
-  $linker->reset();
 
 Or
 
@@ -195,6 +231,11 @@ When the user makes paging or sorting changes in Albums, the stuff for Genres wi
 
 =head2 new( [ base_href => $ENV{REQUEST_URI} ] )
 
+Returns a new C<ASP4x::Linker> object using the supplied C<base_href> value as the "starting point"
+for all links that will be generated.
+
+If no C<base_href> is provided, the value of C<$ENV{REQUEST_URI}> will be used instead.
+
 =head1 PUBLIC READ-ONLY PROPERTIES
 
 =head2 base_href
@@ -203,13 +244,13 @@ Returns the C<base_href> value in use for the linker object.
 
 =head2 widgets
 
-Returns an array of L<ASP4x::Widget> objects assigned to the linker.
+Returns an array of L<ASP4x::Linker::Widget> objects assigned to the linker.
 
 =head1 PUBLIC METHODS
 
 =head2 add_widget( name => $str, attrs => \@attrNames )
 
-Adds a "widget" to
+Adds a "widget" to the widgets collection.
 
 =head2 widget( $name )
 
@@ -231,9 +272,75 @@ Returns the uri for all widgets based on the intersect of:
 
 =back
 
+=head2 hidden_fields( [$properties] )
+
+Returns a string of XHTML hidden input fields (<input type="hidden" name="$name" value="$value" />).
+
+Useful if your persistence logic involves repeated form submissions rather than hyperlinks.
+
+The C<$properties> argument is the same as in the C<uri()> method.
+
+=head2 vars( [$properties] )
+
+Returns a hashref representing the intersect of all widgets' names and attributes.
+
+Supposing you setup your linker like this:
+
+  my $linker = ASP4x::Linker->new();
+  
+  $linker->add_widget(
+    name  => 'albums',
+    attrs => [qw( page sort )]
+  );
+  
+  $linker->add_widget(
+    name  => 'artists',
+    attrs => [qw( page sort )]
+  );
+
+After calling C<vars()> you'd get:
+
+  $VAR1 = {
+    'albums.page'  => undef,
+    'albums.sort'  => undef,
+    'artists.page' => undef,
+    'artists.sort' => undef,
+  };
+
+If you did this:
+
+  $linker->vars({
+    albums  => {page => 2},
+    artists => {sort => 'desc'}
+  });
+
+Then you'd get this instead:
+
+  $VAR1 = {
+    'albums.page'  => 2,
+    'albums.sort'  => undef,
+    'artists.page' => undef,
+    'artists.sort' => 'desc',
+  };
+
+You could also do this:
+
+  $linker->widget('albums')->page( 10 );
+  $linker->widget('artists')->sort( 'desc' );
+  $linker->vars();
+
+And you would get the same thing:
+
+  $VAR1 = {
+    'albums.page'  => 2,
+    'albums.sort'  => undef,
+    'artists.page' => undef,
+    'artists.sort' => 'desc',
+  };
+
 =head2 reset( )
 
-Resets all widgets to their original values from the original request.
+Resets all widgets to their original values from the original request (as specified in the C<base_href> value used by C<new()>).
 
 =head1 SEE ALSO
 
