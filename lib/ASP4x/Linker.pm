@@ -7,7 +7,7 @@ use Carp 'confess';
 use ASP4x::Linker::Widget;
 use ASP4::ConfigLoader;
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 
 sub new
@@ -135,6 +135,11 @@ sub vars
     }# end foreach()
   }# end foreach()
   
+  # Also add any non-ref values that were passed in as $args:
+  map { $vars{$_} = $args->{$_} }
+    grep { ! ref($args->{$_}) }
+      sort keys %$args;
+  
   my $res = \%vars;
   $s->reset();
   return $res;
@@ -204,6 +209,12 @@ Or
   });
   
   # /some-page.asp?albums.page_number=4&genres.page_number=1&genres.page_size=20&genres.sort_col=name&genres.sort_dir=desc
+
+Or
+
+  my $url = $linker->uri({foo => 'bar'});
+  
+  # /some-page.asp?foo=bar
 
 =head1 DESCRIPTION
 

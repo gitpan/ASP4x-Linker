@@ -201,6 +201,12 @@ WITH_VARS_AND_ROUTER: {
     $linker->uri() => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=100&widgetC.color=blue&widgetD.type=hat',
     '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=100&widgetC.color=blue&widgetD.type=hat'
   );
+  
+  is(
+    $linker->uri({yay=>'woot'}) => '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=100&widgetC.color=blue&widgetD.type=hat&yay=woot',
+    '/foo/bar/baz/?widgetA.page_number=24&widgetB.page_size=100&widgetC.color=blue&widgetD.type=hat&yay=woot'
+  );
+  
 
   is(
     $linker->uri({
