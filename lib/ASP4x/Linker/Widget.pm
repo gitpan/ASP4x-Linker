@@ -41,6 +41,8 @@ sub name { shift->{name} }
 sub set
 {
   my ($s, $attr, $val) = @_;
+  confess "widget '$s->{name}' does not have any attribute named '$attr'"
+    unless exists($s->{vars}->{$attr});
   $s->{vars}->{$attr} = $val;
   if( my $triggers = $s->{triggers}->{$attr} )
   {
@@ -163,6 +165,8 @@ was first instantiated.
 =head2 set( $attr => $value )
 
 Changes the value of an attribute to a new value.
+
+B<NOTE:> As of version , attempts to apply a value to a non-existant attribute will result in a runtime exception.
 
 =head2 get( $attr )
 

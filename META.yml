@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               ASP4x-Linker
-version:            0.003
+version:            1.000
 abstract:           In-page persistence of widget-specific variables.
 author:
     - John Drago <jdrago_999@yahoo.com>
@@ -10,8 +10,8 @@ test_requires:
     Test::More:       0
 requires:
     Carp:             0
-    ASP4:             1.024
-    Router::Generic:  0.008
+    ASP4:             1.044
+    Router::Generic:  0.016
 recommends:
     Apache2::RequestRec: 0
 no_index:

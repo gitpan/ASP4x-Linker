@@ -7,7 +7,7 @@ use Carp 'confess';
 use ASP4x::Linker::Widget;
 use ASP4::ConfigLoader;
 
-our $VERSION = '0.003';
+our $VERSION = '1.000';
 
 
 sub new
@@ -107,6 +107,9 @@ sub vars
   my $context = ASP4::HTTPContext->current;
   my $server = $context->server;
   my %vars = %{ $context->request->Form };
+  map {
+    delete($vars{$_})
+  } grep { $_ !~ m/\./ } keys %vars;
   
   if( $context->config->web->can('router') )
   {
@@ -158,63 +161,47 @@ ASP4x::Linker - In-page persistence of widget-specific variables.
 
 =head1 SYNOPSIS
 
+=head2 Setup
+
 (Within /some-page.asp)
 
   use ASP4x::Linker;
-
+  
+  # Create our linker:
   my $linker = ASP4x::Linker->new();
+  -or be more specific-
+  my $linker = ASP4x::Linker->new( base_href => "/whatever.html" );
   
+  # Add a widget:
   $linker->add_widget(
-    name  => "albums",
-    attrs => [qw/ page_number page_size sort_field sort_dir /]
+    name  => "widgetA",
+    attrs => [qw( page_size page_number sort_col sort_dir )]
   );
   
-  $linker->add_widget(
-    name  => "genres",
-    attrs => [qw/ page_number page_size sort_field sort_dir /]
-  );
-  
-  $linker->add_widget(
-    name  => "artists",
-    attrs => [qw/ page_number page_size sort_field sort_dir /]
-  );
-
-...later, on the same page...
-
-  For more info click <a href="<%= $linker->uri() %>">Here</a>.
-
-Then:
-
-  $linker->widget('albums')->page_number(4);
-  
-  <a href="<%= $linker->uri() %>">Page 4</a>  # /some-page.asp?albums.page_number=4
-
-Or
-
-  my $url = $linker->uri({
-    albums => { page_number => 4 }
-  });
-  # /some-page.asp?albums.page_number=4
-
-Or
-
-  my $url = $linker->uri({
-    albums  => { page_number => 4 },
-    genres  => {
-      page_number => 1,
-      page_size   => 20,
-      sort_col    => 'name',
-      sort_dir    => 'desc'
-    }
+  # If the page size is changed, go back to page 1:
+  $linker->widget("widgetA")->on_change( page_size => sub {
+    my ($s) = @_;
+    $s->set( page_number => 1 );
   });
   
-  # /some-page.asp?albums.page_number=4&genres.page_number=1&genres.page_size=20&genres.sort_col=name&genres.sort_dir=desc
+  # Add another widget:
+  $linker->add_widget(
+    name  => "widgetB",
+    attrs => [qw( keywords tag start_date stop_date )]
+  );
 
-Or
+=head2 Setting Variables
 
-  my $url = $linker->uri({foo => 'bar'});
-  
-  # /some-page.asp?foo=bar
+Since the C<$linker> starts out with only the variables found in C<$ENV{REQUEST_URI}>
+or in the C<base_href> argument, calling C<< $linker->uri() >> on a new linker object
+will return the same uri that you are currently on (eg: C</some-page.asp>
+
+To generate links that contain specific attributes, set the attributes for those
+widgets and then call C<< $linker->uri() >> to get the resultant uri to match.
+
+  $linker->widget("widgetA")->set( page_number => 2 );
+  $uri = $linker->uri;
+  # $uri is now "/some-page.asp?widgetA.page_number=2"
 
 =head1 DESCRIPTION
 
