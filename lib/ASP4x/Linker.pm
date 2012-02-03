@@ -7,7 +7,7 @@ use Carp 'confess';
 use ASP4x::Linker::Widget;
 use ASP4::ConfigLoader;
 
-our $VERSION = '1.000';
+our $VERSION = '1.001';
 
 
 sub new
@@ -35,6 +35,7 @@ sub add_widget
   my ($s, %args) = @_;
   
   my $widget = ASP4x::Linker::Widget->new( %args );
+  $widget->linker( $s );
   
   confess "Another widget with the name '@{[ $widget->name ]}' already exists."
     if grep { $_->name eq $widget->name } $s->widgets;
@@ -189,6 +190,10 @@ ASP4x::Linker - In-page persistence of widget-specific variables.
     name  => "widgetB",
     attrs => [qw( keywords tag start_date stop_date )]
   );
+  
+  # Chained accessor goodness:
+  # New as of v1.001
+  my $fancy_uri = $linker->widget('widgetA')->set( %args )->uri;
 
 =head2 Setting Variables
 

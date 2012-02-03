@@ -19,6 +19,7 @@ t/010-basic/030-vars.t
 t/010-basic/040-links.t
 t/010-basic/050-hidden-fields.t
 t/010-basic/060-widget-triggers.t
+t/010-basic/070-chaining.t
 t/conf/asp4-config.json
 t/conf/httpd.conf
 t/htdocs/index.asp

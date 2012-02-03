@@ -40,16 +40,20 @@ sub name { shift->{name} }
 
 sub set
 {
-  my ($s, $attr, $val) = @_;
-  confess "widget '$s->{name}' does not have any attribute named '$attr'"
-    unless exists($s->{vars}->{$attr});
-  $s->{vars}->{$attr} = $val;
-  if( my $triggers = $s->{triggers}->{$attr} )
+  my ($s, %args) = @_;
+  while( my ($attr, $val) = each %args )
   {
-    map { $_->( $s ) } @$triggers
-  }# end if()
+    confess "widget '$s->{name}' does not have any attribute named '$attr'"
+      unless exists($s->{vars}->{$attr});
+    $s->{vars}->{$attr} = $val;
+    if( my $triggers = $s->{triggers}->{$attr} )
+    {
+      map { $_->( $s ) } @$triggers
+    }# end if()
+  }# end while()
   
-  $val;
+#  $val;
+  $s;
 }# end set()
 
 
@@ -76,6 +80,16 @@ sub reset
   
   %{ $s->{vars} } = %{ $s->{original_vars} };
 }# end reset()
+
+
+sub linker
+{
+  my $s = shift;
+  @_ ? $s->{linker} = shift : $s->{linker};
+}# end linker()
+
+
+sub uri { shift->linker->uri }
 
 
 sub on_change
@@ -128,6 +142,15 @@ ASP4x::Linker::Widget - A single item that should be persisted via links.
   
   $widget->set( page_size => 20 );
   print $widget->get( 'page_number' );  # 1
+  
+  # Set multiple values at once:
+  $widget->set( %args );
+  
+  # Set multiple values at once and get the uri:
+  warn $widget->set( %args )->uri();
+  
+  # Set multiple values by chaining and get the uri:
+  warn $widget->set( foo => 'bar' )->set( baz => 'bux' )->uri();
 
 =head1 DESCRIPTION
 
@@ -175,6 +198,10 @@ Returns the current value of the attribute.
 =head2 on_change( $attr => sub { ... } )
 
 Adds a trigger to the widget that will be called when the given attribute's value is changed via C<set()>.
+
+=head2 uri()
+
+Just a wrapper around the widget's parent C<ASP4x::Linker> object.
 
 =head1 SEE ALSO
 

@@ -1,4 +1,12 @@
 
+Changelog for ASP4x::Linker:
+
+2012-02-03      v1.001
+  - Added chained widget-attribute-setters.
+    $widget->set(foo => 'bar', ...)->uri();
+    $widget->set(%args)->set(%more_args)->uri();
+  - Thanks to eric.hayes++ for the suggestion.
+
 2011-05-01      v1.000
   - $widget->set( non_existent_attribute => "value" ) will result in an exception.
   - Simplified the documentation for ASP4x::Linker - the simplified style of

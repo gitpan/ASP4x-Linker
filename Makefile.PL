@@ -9,9 +9,9 @@ license 'perl';
 all_from 'lib/ASP4x/Linker.pm';
 
 test_requires 'Test::More'  => '0';
-test_requires 'Router::Generic' => '0.008';
+test_requires 'Router::Generic' => '0.016';
 
-requires 'ASP4'             => '1.024';
+requires 'ASP4'             => '1.044';
 
 tests_recursive();
 WriteAll();
