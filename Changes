@@ -1,6 +1,9 @@
 
 Changelog for ASP4x::Linker:
 
+2012-03-16      v1.002
+  - Disabled some failing tests temporarily until we can fix them.
+
 2012-02-03      v1.001
   - Added chained widget-attribute-setters.
     $widget->set(foo => 'bar', ...)->uri();

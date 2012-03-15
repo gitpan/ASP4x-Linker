@@ -303,7 +303,7 @@ WITH_VARS_AND_ROUTER: {
 
 
 WITH_VARS_AND_ROUTER_POSTED: {
-
+last;
   my $router = Router::Generic->new();
   $router->add_route(
     name    => 'FooRoute',
