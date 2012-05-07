@@ -1,6 +1,10 @@
 
 Changelog for ASP4x::Linker:
 
+2012-05-07      v1.002
+  - DEPRECATED
+  - ASP4 has been marked as deprecated, and so this module follows suit.
+
 2012-03-16      v1.002
   - Disabled some failing tests temporarily until we can fix them.
 

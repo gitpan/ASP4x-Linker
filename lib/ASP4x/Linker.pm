@@ -7,7 +7,7 @@ use Carp 'confess';
 use ASP4x::Linker::Widget;
 use ASP4::ConfigLoader;
 
-our $VERSION = '1.002';
+our $VERSION = '1.003';
 
 
 sub new
@@ -159,6 +159,10 @@ sub DESTROY { my $s = shift; undef(%$s); }
 =head1 NAME
 
 ASP4x::Linker - In-page persistence of widget-specific variables.
+
+=head1 DEPRECATED
+
+L<ASP4> was marked deprecated, so this module is now also deprecated.
 
 =head1 SYNOPSIS
 
